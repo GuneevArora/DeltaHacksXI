@@ -1,13 +1,10 @@
 
 import streamlit as st
-from openai import OpenAI
+import cohere
 
-st.title("ChatGPT-like clone")
+st.title("Security (Optional) Bot")
 
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
-if "openai_model" not in st.session_state:
-    st.session_state["openai_model"] = "gpt-3.5-turbo"
+client = cohere.ClientV2(api_key=st.secrets['COHERE_API_KEY'])
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -22,13 +19,12 @@ if prompt := st.chat_input("What is up?"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        stream = client.chat.completions.create(
-            model=st.session_state["openai_model"],
-            messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
-            ],
-            stream=True,
+        res = client.chat(
+            model='command-r-plus-08-2024',
+            messages=st.session_state.messages
         )
-        response = st.write_stream(stream)
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    
+        response = res.message.content[0].text
+        print('COHERE response:', response)
+        st.markdown(response)
+    st.session_state.messages.append({ 'role': 'assistant', 'content': response })
