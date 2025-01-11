@@ -1,6 +1,7 @@
 """
 Returns a list of ['Site', 'Date'] pairs of which the input email has been exposed in, using LeakCheck API.
 * MAY NEED SOME WORK ON THE INPUT SYSTEM *
+* NEEDS ERROR CHECKING FOR INCORRECT EMAILS & NO DATA LEAK EMAILS *
 """
 
 from leakcheck import LeakCheckAPI_Public
