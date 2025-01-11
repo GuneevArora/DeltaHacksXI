@@ -1,9 +1,15 @@
 
 import streamlit as st
 import cohere
+from components import my_component
 
+
+# Custom components
 st.title("Security (Optional) Bot")
 
+
+
+# AI Chat bot using Cohere
 client = cohere.ClientV2(api_key=st.secrets['COHERE_API_KEY'])
 
 if "messages" not in st.session_state:
@@ -28,3 +34,21 @@ if prompt := st.chat_input("What is up?"):
         print('COHERE response:', response)
         st.markdown(response)
     st.session_state.messages.append({ 'role': 'assistant', 'content': response })
+
+
+# Sidebar
+with st.sidebar:
+    my_component("Sup", key="foo")
+
+
+# Custom CSS
+st.markdown(
+    """
+    <style>
+        section[data-testid="stSidebar"] {
+            width: 600px !important; # Set the width to your desired value
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)

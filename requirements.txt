@@ -1,3 +1,4 @@
 leakcheck
 streamlit
-openai
+cohere
+setuptools
