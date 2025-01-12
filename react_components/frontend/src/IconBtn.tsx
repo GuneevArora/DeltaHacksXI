@@ -13,16 +13,10 @@ function IconBtn({ args }: ComponentProps): ReactElement {
     });
 
     useEffect(() => {
-        if (src == "/email_icon.png") {
-            console.log(`LEAK BTN STATE ${clicked}`);
-        }
         if (clicked) {
             setTimeout(() => {
                 Streamlit.setComponentValue(0);
                 setClicked(false);
-                if (src == '/email_icon.png') {
-                    console.log('RESET BIN STATE');
-                }
             }, 1000);
         }
     }, [clicked]);
