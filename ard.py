@@ -4,6 +4,8 @@ from using_vpn import get_user_ip
 
 _IP = get_user_ip()
 
+print(_IP)
+
 def send_ard(password):
     try:
         ard_port = None
@@ -16,7 +18,7 @@ def send_ard(password):
         arduino = serial.Serial(ard_port, 115200)
     except:
         raise ConnectionRefusedError()
-    data = f'{password},{_IP}'
+    data = f'{_IP},{password}'
     arduino.write(data.encode())
     arduino.close()
 
