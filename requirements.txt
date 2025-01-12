@@ -6,3 +6,4 @@ hashlib
 requests
 cohere
 setuptools
+pysafebrowsing
