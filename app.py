@@ -1,13 +1,70 @@
-
+from typing import NamedTuple
 import streamlit as st
+from streamlit.delta_generator import DeltaGenerator
 import cohere
-from components import my_component
+from react_components import icon_btn
+from passman import generate_pass, PWSetup
 
+if 'sidebar_state' not in st.session_state:
+    st.session_state['sidebar_state'] = 'none'
+if 'skip' not in st.session_state:
+    st.session_state['skip'] = False
+
+st.markdown('''
+<style>
+    div[data-testid="stSidebarCollapseButton"] {
+        display: none!important;
+    }
+        
+    div[data-testid="stSidebarUserContent"] {
+        padding: 0px 0px !important;
+    }
+</style>
+''', unsafe_allow_html=True)
+
+EXPANDED_STYLING = '''
+<style>
+    .stSidebar {
+        width: 300x!important;
+        max-width: 300px!important;
+        min-width: 300px!important;
+    }
+</style>
+'''
+COLAPSED_STYLING = '''
+<style>
+    .stSidebar {
+        width: 100px!important;
+        max-width: 100px!important;
+        min-width: 100px!important;
+    }
+</style>
+'''
+
+
+SIDE_BAR_STYLING = None
+if st.session_state['sidebar_state'] == 'none':
+    SIDE_BAR_STYLING = COLAPSED_STYLING
+else:
+    SIDE_BAR_STYLING = EXPANDED_STYLING
+
+def change_sidebar(tab: str):
+    st.session_state['sidebar_state'] = tab
+
+def toggle_sidebar(tab: str):
+    global SIDE_BAR_STYLING
+    if st.session_state['skip']:
+        st.session_state['skip'] = False
+        return
+    if st.session_state['sidebar_state'] == tab:
+        st.session_state['sidebar_state'] = 'none'
+    else:
+        st.session_state['sidebar_state'] = tab
+    st.session_state['skip'] = True
+    st.rerun()
 
 # Custom components
 st.title("Security (Optional) Bot")
-
-
 
 # AI Chat bot using Cohere
 client = cohere.ClientV2(api_key=st.secrets['COHERE_API_KEY'])
@@ -31,24 +88,50 @@ if prompt := st.chat_input("What is up?"):
         )
     
         response = res.message.content[0].text
-        print('COHERE response:', response)
         st.markdown(response)
     st.session_state.messages.append({ 'role': 'assistant', 'content': response })
 
 
 # Sidebar
-with st.sidebar:
-    my_component("Sup", key="foo")
+
+icon_col, tab_col = None, None
+
+if st.session_state['sidebar_state'] == 'none':
+    icon_col = st.sidebar.columns([1])[0]
+else:
+    icon_col,tab_col = st.sidebar.columns([100/300, 1 - 100/300])
 
 
-# Custom CSS
-st.markdown(
-    """
-    <style>
-        section[data-testid="stSidebar"] {
-            width: 600px !important; # Set the width to your desired value
-        }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+# (icon,key,tab)
+Tab = NamedTuple('Tab', [('icon',str),('tab',str)])
+TABS = [
+    Tab('/email_icon.png','leak'),
+    Tab('/password_icon.png','pwman'),
+    Tab('/url_icon.png','safe'),
+    Tab('/vault_icon.png','vault'),
+]
+
+with icon_col:
+    for icon,tab in TABS:
+        ibv = icon_btn(src=icon, key=tab)
+
+        print(tab, 'BTN state', ibv)
+        if ibv == 1:
+            toggle_sidebar(tab)
+
+if st.session_state['sidebar_state'] == 'pwman':
+    with tab_col:
+
+        with st.expander('Password Generator'):
+            mil = st.number_input(label='Minimum chars', value=6)
+            mal = st.number_input(label='Maximum chars', value=20)
+            sn  = st.number_input(label='# of Special chars', value=1)
+            nn  = st.number_input(label='# of Numerical chars', value=1)
+            cn  = st.number_input(label='# of Capital chars', value=1)
+
+            if st.button(label='Generate Password'):
+                pg = generate_pass(PWSetup(mil, mal, sn, nn, cn))
+                st.text(pg)
+
+
+st.markdown(SIDE_BAR_STYLING, unsafe_allow_html=True)
