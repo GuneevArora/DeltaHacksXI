@@ -7,6 +7,7 @@ from dataclasses import dataclass
 _CLIENT = None
 
 
+
 @dataclass
 class PWSetup:
     min_length: int
