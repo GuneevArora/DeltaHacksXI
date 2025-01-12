@@ -3,6 +3,7 @@ import streamlit as st
 from streamlit.delta_generator import DeltaGenerator
 import cohere
 from react_components import icon_btn
+from passman import generate_pass, PWSetup
 
 if 'sidebar_state' not in st.session_state:
     st.session_state['sidebar_state'] = 'none'
@@ -117,5 +118,20 @@ with icon_col:
         print(tab, 'BTN state', ibv)
         if ibv == 1:
             toggle_sidebar(tab)
+
+if st.session_state['sidebar_state'] == 'pwman':
+    with tab_col:
+
+        with st.expander('Password Generator'):
+            mil = st.number_input(label='Minimum chars', value=6)
+            mal = st.number_input(label='Maximum chars', value=20)
+            sn  = st.number_input(label='# of Special chars', value=1)
+            nn  = st.number_input(label='# of Numerical chars', value=1)
+            cn  = st.number_input(label='# of Capital chars', value=1)
+
+            if st.button(label='Generate Password'):
+                pg = generate_pass(PWSetup(mil, mal, sn, nn, cn))
+                st.text(pg)
+
 
 st.markdown(SIDE_BAR_STYLING, unsafe_allow_html=True)
