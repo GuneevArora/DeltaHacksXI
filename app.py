@@ -21,6 +21,10 @@ st.markdown('''
     div[data-testid="stSidebarUserContent"] {
         @apply p-4;
     }
+    
+    div[data-testid="stTextInputRootElement"] {
+        @apply mt-60 !important;
+    }
 </style>
 ''', unsafe_allow_html=True)
 
