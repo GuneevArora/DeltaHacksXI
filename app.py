@@ -1,7 +1,7 @@
 
 import streamlit as st
 import cohere
-from components import my_component
+from react_components import icon_btn
 
 
 # Custom components
@@ -38,7 +38,8 @@ if prompt := st.chat_input("What is up?"):
 
 # Sidebar
 with st.sidebar:
-    my_component("Sup", key="foo")
+    if icon_btn('/icon.png'):
+        print('IB clicked')
 
 
 # Custom CSS
