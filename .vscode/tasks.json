@@ -6,14 +6,15 @@
             "dependsOn": [
                 "React Server",
                 "Streamlit Server"
-            ]
+            ],
+            "problemMatcher": []
         },
         {
             "label": "React Server",
             "type": "shell",
             "command": "npm start dev",
             "options": {
-                "cwd": "${workspaceFolder}/react_components/frontend",
+                "cwd": "${workspaceFolder}/react_components/frontend"
             },
             "presentation": {
                 "echo": true,
@@ -33,8 +34,7 @@
             "type": "shell",
             "command": "python -m streamlit run app.py",
             "options": {
-                "cwd": "${workspaceFolder}",
-                
+                "cwd": "${workspaceFolder}"
             },
             "presentation": {
                 "echo": true,

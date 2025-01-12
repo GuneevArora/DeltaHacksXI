@@ -4,7 +4,7 @@ from pysafebrowsing import SafeBrowsing
 def check_url_safety(url):
     s = SafeBrowsing(st.secrets["SAFE_BROWSING_API_KEY"], )
     r = s.lookup_urls([url])
-    print(r[url])
+    return r[url]
 
 
 #check_url_safety("http://www.malware.testing.google.test/testing/malware/")  # test the function
