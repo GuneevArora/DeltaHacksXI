@@ -3,3 +3,6 @@ streamlit
 openai
 cryptography
 hashlib
+requests
+cohere
+setuptools
