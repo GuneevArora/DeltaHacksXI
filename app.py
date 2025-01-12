@@ -3,11 +3,11 @@ import streamlit as st
 from streamlit.delta_generator import DeltaGenerator
 from leaked_sites import is_valid_email, check_email_leaks
 import cohere
-from react_components import icon_btn, pw_shower, pwn_card
+from react_components import icon_btn, pw_shower, pwn_card, vault
 from passman import generate_pass, PWSetup, get_list as get_password_list, view_password, add_password
 from url_checker import check_url_safety
 from time import sleep
-from enc import encrypt, decrypt, verify_file_integrity, generate_key, upload_to_vault
+from enc import upload_to_vault, get_files_list, download_from_vault, vault_delete
 
 if 'messages' not in st.session_state:
     st.session_state.messages = []
@@ -19,6 +19,8 @@ if 'explain_leak' not in st.session_state:
     st.session_state['explain_leak'] = None
 if 'VIEW_PASS' not in st.session_state:
     st.session_state['VIEW_PASS'] = -1
+if 'DOWN_DATA' not in st.session_state:
+    st.session_state['DOWN_DATA'] = None
 
 @st.dialog('Info')
 def modal(mes: str):
@@ -226,16 +228,30 @@ elif st.session_state['sidebar_state'] == 'vault':
         if file != "" :
             enc_submit = st.button("Submit")
         if enc_submit:
-            print(file)
             upload_to_vault(file)
             st.text("File stored successfully!")
-                
-
-
         
-        
-            
+        fl = get_files_list()
 
+        if st.session_state['DOWN_DATA'] is not None and st.session_state['DOWN_DATA']['f']:
+            st.download_button(
+                f'Click to Download {st.session_state["DOWN_DATA"]["f"]}',
+                st.session_state['DOWN_DATA']['data'],
+                st.session_state['DOWN_DATA']['f']
+            )
+
+        action = vault(get_files_list())
+        if action is not None:
+            dm = action['deleteMode']
+            f = action['file']
+            idx = action['idx']
+            st.session_state['DOWN_DATA'] = None
+            if dm:
+                vault_delete(f)
+            else:
+                data = download_from_vault(f)
+                st.session_state['DOWN_DATA'] = { 'data': data, 'f': f }
+                st.rerun()
 
 st.markdown(SIDE_BAR_STYLING, unsafe_allow_html=True)
 st.session_state['skip'] = False

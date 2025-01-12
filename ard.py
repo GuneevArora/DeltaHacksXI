@@ -11,7 +11,6 @@ def send_ard(password):
             if 'arduino' in title.lower():
                 ard_port = port
                 break
-        print('Ard port', ard_port)
         if ard_port is None:
             raise ConnectionAbortedError()
         arduino = serial.Serial(ard_port, 115200)
