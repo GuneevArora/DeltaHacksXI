@@ -4,6 +4,7 @@ from cryptography.fernet import Fernet
 import hashlib
 import os
 import random
+import json
 
 if not os.path.exists('.vault'):
     os.makedirs('.vault')
@@ -40,17 +41,20 @@ def get_key():
     
     return _KEY
 
+_DB_FILE = '.vault/asfsdafsilWG2pz4C'
+def save_db():
+    global _DB
+    with open(_DB_FILE, 'wb') as f:
+            f.write(encrypt(json.dumps(_DB).encode()))
+
 def get_db():
     global _DB
-    
     if _DB is None:
-        _DB = {'OTN':{},'NTO':{},'F_H':{}}
-    #encrypt the database
-    key = get_key()
-    (encrypted_db, key) = encrypt('.vault/j9xyrhffSaKepY7B8')
-    with open('.vault/', 'wb') as f:
-        f.write(encrypted_db)
-
+        if not os.path.exists(_DB_FILE):
+            _DB = {'OTN':{},'NTO':{},'F_H':{}}
+            save_db()
+        else:
+            _DB = json.loads(decrypt(open(_DB_FILE, 'rb').read()).decode())
     return _DB
 
 
@@ -60,47 +64,42 @@ def generate_key():
         keysFile.write(key)
     return key
 
-
 def encrypt(data: bytes) -> bytes:
     key = get_key()
-    return (key.encrypt(data), key)
+    return key.encrypt(data)
 
 def decrypt(data: bytes) -> bytes:
     key = get_key()
     return key.decrypt(data)
 
-def upload_to_vault(file: str):
-    with open(file, 'rb') as f:
-        encrypted = encrypt(f.read())
-    nf = random_generator()
+def upload_data_to_vault(filepath: str, data: bytes):
+    encrypted = encrypt(data)
+    nf = f'.vault/{random_generator()}'
     with open(nf, 'wb') as f:
         f.write(encrypted)
     
-    fh = hash_gen(file)
+    fh = hash_gen(nf)
     db = get_db()
-    db['OTN'][file] = nf
-    db['NTO'][nf] = file
-    db['F_H'][file] = fh
+    db['OTN'][filepath] = nf
+    db['NTO'][nf] = filepath
+    db['F_H'][filepath] = fh
 
-#Decrypt the file TODO
-# def decrypt(file, key):
-#     key_data = Fernet(key)
-#     with open(file, 'rb') as f:
-#         encrypted_data = f.read()
+def upload_to_vault(file):
+    upload_data_to_vault(file.name, file.read())
 
-#     decrypted_data = key_data.decrypt(encrypted_data)
-#     new_file = random_generator()
-#     with open(new_file, 'wb') as f:
-#         f.write(decrypted_data)
+def download_from_vault(file: str) -> bytes:
+    ofn = get_db()['OTN'][file]
+    with open(ofn, 'rb') as f:
+        ee = f.read()
+    return get_key().decrypt(ee)
 
-#     db = get_db()
-#     db['NTO'][new_file] = file
-
-#     return decrypted_data
+def files_list():
+    return list(get_db()['OTN'].keys())
 
 #File Integrity Checker to 
 def hash_gen(file):
-    data = file.read()
+    with open(file, 'rb') as f:
+        data = f.read()
     
     file_hash = hashlib.sha256(data).hexdigest()    
 

@@ -223,11 +223,12 @@ elif st.session_state['sidebar_state'] == 'vault':
     with tab_col:
         st.header('Encrypt Files in Vault:')
         file = st.file_uploader("Drop Files Here:")
-        if file != "" : enc_submit = st.button("Submit")
+        if file != "" :
+            enc_submit = st.button("Submit")
         if enc_submit:
-            key = generate_key()
+            print(file)
             upload_to_vault(file)
-            st.text("File stored successfully! Here is your key: ", key)
+            st.text("File stored successfully!")
                 
 
 
