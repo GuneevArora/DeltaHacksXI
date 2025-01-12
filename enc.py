@@ -17,8 +17,6 @@ def random_generator():
     password = ''.join(random.choice(chars) for _ in range(17))
     return password
 
-print(random_generator())
-print(random_generator())
 
 def generate_key():
     key= Fernet.generate_key()
