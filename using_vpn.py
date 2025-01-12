@@ -5,6 +5,7 @@ Any incorrect IP data or errors simply return False.
 """
 
 import requests
+import streamlit
 
 def get_user_ip():
     """
@@ -24,7 +25,7 @@ def get_user_ip():
 
 def using_vpn():
     ip_address = get_user_ip()
-    api_key = '67661z-4k9c06-2302d7-017030'
+    api_key = streamlit.secrets["VPN_APIKEY"]
     url = f'https://proxycheck.io/v2/{ip_address}?key={api_key}&vpn=1'
     response = requests.get(url)
     if response.status_code == 200:  # if response was successful (code 200)
