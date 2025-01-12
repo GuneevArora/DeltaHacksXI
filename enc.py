@@ -61,12 +61,17 @@ def generate_key():
     return key
 
 
-def encrypt(data: str):
+def encrypt(data: bytes) -> bytes:
     key = get_key()
     return (key.encrypt(data), key)
 
-def upload_to_vault(file):
-    (encrypted, key) = encrypt(file.read())
+def decrypt(data: bytes) -> bytes:
+    key = get_key()
+    return key.decrypt(data)
+
+def upload_to_vault(file: str):
+    with open(file, 'rb') as f:
+        encrypted = encrypt(f.read())
     nf = random_generator()
     with open(nf, 'wb') as f:
         f.write(encrypted)
@@ -76,23 +81,22 @@ def upload_to_vault(file):
     db['OTN'][file] = nf
     db['NTO'][nf] = file
     db['F_H'][file] = fh
-    return key
 
-#Decrypt the file
-def decrypt(file, key):
-    key_data = Fernet(key)
-    with open(file, 'rb') as f:
-        encrypted_data = f.read()
+#Decrypt the file TODO
+# def decrypt(file, key):
+#     key_data = Fernet(key)
+#     with open(file, 'rb') as f:
+#         encrypted_data = f.read()
 
-    decrypted_data = key_data.decrypt(encrypted_data)
-    new_file = random_generator()
-    with open(new_file, 'wb') as f:
-        f.write(decrypted_data)
+#     decrypted_data = key_data.decrypt(encrypted_data)
+#     new_file = random_generator()
+#     with open(new_file, 'wb') as f:
+#         f.write(decrypted_data)
 
-    db = get_db()
-    db['NTO'][new_file] = file
+#     db = get_db()
+#     db['NTO'][new_file] = file
 
-    return decrypted_data
+#     return decrypted_data
 
 #File Integrity Checker to 
 def hash_gen(file):
