@@ -6,11 +6,16 @@ import cohere
 from react_components import icon_btn, pwn_card
 from passman import generate_pass, PWSetup
 from url_checker import check_url_safety
+from time import sleep
 
+if 'messages' not in st.session_state:
+    st.session_state.messages = []
 if 'sidebar_state' not in st.session_state:
     st.session_state['sidebar_state'] = 'none'
 if 'skip' not in st.session_state:
     st.session_state['skip'] = False
+if 'explain_leak' not in st.session_state:
+    st.session_state['explain_leak'] = None
 
 st.markdown('''
 <style>
@@ -78,25 +83,39 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-def ask_bot(prompt):
 
+def ask_bot(messages, rerun = False):
+    res = client.chat(
+        model='command-r-plus-08-2024',
+        messages=messages
+    )
+    response = res.message.content[0].text
+    st.session_state['messages'].append({ 'role': 'assistant', 'content': response })
     with st.chat_message("assistant"):
-        res = client.chat(
-            model='command-r-plus-08-2024',
-            messages=st.session_state.messages
-        )
-    
-        response = res.message.content[0].text
         st.markdown(response)
-    st.session_state.messages.append({ 'role': 'assistant', 'content': response })
+
+def explain_leak(leak_source):
+    new_msg = ''
+    if leak_source.date is not None and len(leak_source.date) > 0:
+        new_msg = f'Can you tell me about the data breach at {leak_source.site_name} on {leak_source.date}'
+    else:
+        new_msg = f'Can you tell me about the data breach at {leak_source.site_name}'
+    ask_bot([
+        { 'role': 'system', 'content': 'You are a bot that reports on data breaches and explain why and what happend. Only respond with answers in line with the topic, do not stray away from data breaches. Do not make up answers.'},
+        { 'role': 'user', 'content': new_msg }
+    ], rerun=True)
+
+
+if st.session_state['explain_leak'] is not None:
+    explain_leak(st.session_state['explain_leak'])
+    st.session_state['explain_leak'] = None
+    st.session_state['skip'] = False
 
 if prompt := st.chat_input("Ask a question:"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
-    ask_bot(prompt)
-    
-
+    ask_bot(st.session_state.messages)
 
 # Sidebar
 
@@ -124,19 +143,24 @@ with icon_col:
 
 if st.session_state['sidebar_state'] == "leak":
     with tab_col:
-        if email := st.chat_input("Insert Email", key="email-input"):
+        email = st.text_input("Insert Email", key="email-input")
+
+        if st.button('Go') or email:
             if is_valid_email(email):
                 output = check_email_leaks(email)
                 if len(output) == 0:
                     st.balloons()
                     st.success("Congratulations! No email leaks have been found!")
                 else:
-                    for i in range(0,len(output)):
-                        # renders pwn card. returns true if button is clicked, where bot is asked about a chosen data leak
-                        pc = pwn_card(header=output[i].site_name, body=output[i].date, key="pwncard"+ str(i))
+                    for i,out in enumerate(output):
+                        pc = pwn_card(header=out.site_name, body=out.date, key=str(i))
                         if pc == 1:
-                            prompt = "Tell me about the " + output[i].site_name + " data leak on " + output[i].date
-                            ask_bot(prompt)
+                            if st.session_state['skip']:
+                                continue
+                            else:
+                                st.session_state['explain_leak'] = out
+                                st.session_state['skip'] = True
+                                sleep(10)
             else:
                 st.error("Email Not Valid!")
 elif st.session_state['sidebar_state'] == 'pwman':
@@ -168,3 +192,5 @@ elif st.session_state['sidebar_state'] == 'safe':
 
 
 st.markdown(SIDE_BAR_STYLING, unsafe_allow_html=True)
+st.session_state['skip'] = False
+st.session_state['do_last'] = False
