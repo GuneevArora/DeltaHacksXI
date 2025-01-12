@@ -4,10 +4,21 @@ import cohere
 from react_components import icon_btn
 
 
+
+if 'sidebar_state' not in st.session_state:
+    st.session_state['sidebar_state'] = 'none'
+
+def change_sidebar(tab: str):
+    st.session_state['sidebar_state'] = tab
+
+def toggle_sidebar(tab: str):
+    if st.session_state['sidebar_state'] == tab:
+        st.session_state['sidebar_state'] = 'none'
+    else:
+        st.session_state['sidebar_state'] = tab
+
 # Custom components
 st.title("Security (Optional) Bot")
-
-
 
 # AI Chat bot using Cohere
 client = cohere.ClientV2(api_key=st.secrets['COHERE_API_KEY'])
@@ -37,9 +48,34 @@ if prompt := st.chat_input("What is up?"):
 
 
 # Sidebar
-with st.sidebar:
-    if icon_btn('/icon.png'):
-        print('IB clicked')
+
+icon_col, tab_col = None, None
+
+if st.session_state['sidebar_state'] == 'none':
+    icon_col,tab_col = st.sidebar.columns([75/280, 1 - 75/280])
+else:
+    icon_col = st.sidebar.columns([1])
+
+with icon_col:
+    if icon_btn(src='/icon.png'):
+        toggle_sidebar('goggle')
+
+if st.session_state['sidebar_state'] == 'none':
+    st.markdown('''
+    <style>
+        .sidebar-content {
+            width: 80px;
+        }
+    </style>
+    ''')
+else:
+    st.markdown('''
+    <style>
+        .sidebar-content {
+            width: 300px;
+        }
+    </style>
+    ''')
 
 
 # Custom CSS
