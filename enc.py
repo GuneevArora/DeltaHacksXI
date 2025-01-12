@@ -36,7 +36,7 @@ def get_key():
         if not os.path.exists('silWG2pz4C!KQ3JDP.key'):
             _KEY = generate_key()
         else:
-            _KEY = load_key()
+            _KEY = Fernet(load_key())
     
     return _KEY
 
@@ -54,7 +54,6 @@ def get_db():
     return _DB
 
 
-
 def generate_key():
     key= Fernet.generate_key()
     with open('silWG2pz4C!KQ3JDP.key', 'wb') as keysFile:
@@ -62,26 +61,23 @@ def generate_key():
     return key
 
 
+def encrypt(data: str):
+    key = get_key()
+    return key.encrypt(data)
 
-
-#Encrypt the file
-def encrypt(file, key):
-    key_data = Fernet(key)
+def upload_to_vault(file: str):
     with open(file, 'rb') as f:
-        data = f.read()
-
-    encrypted_data = key_data.encrypt(data)
-    new_file = random_generator()
-    with open(new_file, 'wb') as f:
-        f.write(encrypted_data)
-
-    hash_gen(file)
-    db = get_db()
-    db['OTN'][file] = new_file
-    db['F_H'][file] = hash_gen(new_file)
+        encrypted = encrypt(f.read())
+    nf = random_generator()
+    with open(nf, 'wb') as f:
+        f.write(encrypted)
     
-
-    return encrypted_data
+    fh = hash_gen(file)
+    db = get_db()
+    db['OTN'][file] = nf
+    db['NTO'][nf] = file
+    db['F_H'][file] = fh
+    return True
 
 #Decrypt the file
 def decrypt(file, key):
