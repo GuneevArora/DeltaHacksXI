@@ -210,7 +210,7 @@ if st.session_state.show_quiz:
 
     # Button to calculate the score
     TO_SHOW = None
-    if st.button("Submit"):
+    if st.button("Submit", key="havybysb"):
         if answers['browser'] == 'Select':  # You can easily check for 'Select' here
             st.warning("Please select a valid browser option.")
         else:
@@ -277,7 +277,7 @@ if st.session_state['sidebar_state'] == "leak":
     with tab_col:
         email = st.text_input("Insert Email", key="email-input")
 
-        if st.button('Go') or email:
+        if st.button('Go', key = "dhbudwjdwn") or email:
             if is_valid_email(email):
                 output = check_email_leaks(email)
                 if len(output) == 0:
@@ -308,7 +308,7 @@ elif st.session_state['sidebar_state'] == 'pwman':
             nn  = st.number_input(label='# of Numerical chars', value=1)
             cn  = st.number_input(label='# of Capital chars', value=1)
 
-            if st.button(label='Generate Password'):
+            if st.button(label='Generate Password', key = "udbjwddefjfjf"):
                 pg = generate_pass(PWSetup(mil, mal, sn, nn, cn))
                 st.text(pg)
 
@@ -317,7 +317,7 @@ elif st.session_state['sidebar_state'] == 'pwman':
         site = st.text_input('site')
         username = st.text_input('username/email', value='')
         password = st.text_input('password', value='')
-        if st.button('Save password'):
+        if st.button('Save password', key="dhwbduudjnj"):
             add_password(site, username, password)
 
         pw_c = pw_shower(get_password_list())
@@ -328,7 +328,7 @@ elif st.session_state['sidebar_state'] == 'safe':
     with tab_col:
         st.header('Is that a safe URL?')
         url = st.text_input(label='url', )
-        if st.button('Go'):
+        if st.button('Go', key ="dhdhbwdubdhwhgy"):
             res = check_url_safety(url)
             if res['malicious']:
                 st.text('This website is flagged for being malicious.')
@@ -345,7 +345,7 @@ elif st.session_state['sidebar_state'] == 'vault':
         st.header('Encrypt Files in Vault:')
         file = st.file_uploader("Drop Files Here:")
         if file != "" :
-            enc_submit = st.button("Submit")
+            enc_submit = st.button("Submit", key="ydbaukj")
         if enc_submit:
             upload_to_vault(file)
             st.text("File stored successfully!")
@@ -356,7 +356,7 @@ elif st.session_state['sidebar_state'] == 'vault':
             st.download_button(
                 f'Click to Download {st.session_state["DOWN_DATA"]["f"]}',
                 st.session_state['DOWN_DATA']['data'],
-                st.session_state['DOWN_DATA']['f']
+                st.session_state['DOWN_DATA']['f'], key="hjbhddahdj"
             )
 
         action = vault(get_files_list())
