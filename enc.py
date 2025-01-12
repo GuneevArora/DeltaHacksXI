@@ -10,7 +10,7 @@ if not os.path.exists('.vault'):
     os.makedirs('.vault')
 
 _DB = None
-_KEY = None
+_KEY: Fernet = None
 
 chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%*_="
 
@@ -18,23 +18,22 @@ def random_generator():
     password = ''.join(random.choice(chars) for _ in range(17))
     return password
 
+KEY_FILE = '.vault/silWG2pz4C!KQ3JDP.key'
 
-def generate_key():
+def generate_key() -> Fernet:
     key= Fernet.generate_key()
-    with open('silWG2pz4C!KQ3JDP.key', 'wb') as keysFile:
+    with open(KEY_FILE, 'wb') as keysFile:
         keysFile.write(key)
-    return key
-
-
+    return Fernet(key)
 
 def load_key():
-    return open('silWG2pz4C!KQ3JDP.key', 'rb').read()
+    return open(KEY_FILE, 'rb').read()
 
 def get_key():
     global _KEY
 
     if _KEY is None:
-        if not os.path.exists('silWG2pz4C!KQ3JDP.key'):
+        if not os.path.exists(KEY_FILE):
             _KEY = generate_key()
         else:
             _KEY = Fernet(load_key())
@@ -45,7 +44,7 @@ _DB_FILE = '.vault/asfsdafsilWG2pz4C'
 def save_db():
     global _DB
     with open(_DB_FILE, 'wb') as f:
-            f.write(encrypt(json.dumps(_DB).encode()))
+        f.write(encrypt(json.dumps(_DB).encode()))
 
 def get_db():
     global _DB
@@ -56,13 +55,6 @@ def get_db():
         else:
             _DB = json.loads(decrypt(open(_DB_FILE, 'rb').read()).decode())
     return _DB
-
-
-def generate_key():
-    key= Fernet.generate_key()
-    with open('silWG2pz4C!KQ3JDP.key', 'wb') as keysFile:
-        keysFile.write(key)
-    return key
 
 def encrypt(data: bytes) -> bytes:
     key = get_key()
@@ -83,6 +75,7 @@ def upload_data_to_vault(filepath: str, data: bytes):
     db['OTN'][filepath] = nf
     db['NTO'][nf] = filepath
     db['F_H'][filepath] = fh
+    save_db()
 
 def upload_to_vault(file):
     upload_data_to_vault(file.name, file.read())
@@ -93,7 +86,7 @@ def download_from_vault(file: str) -> bytes:
         ee = f.read()
     return get_key().decrypt(ee)
 
-def files_list():
+def get_files_list():
     return list(get_db()['OTN'].keys())
 
 #File Integrity Checker to 
@@ -109,8 +102,10 @@ def verify_file_integrity(file, original_hash):
     current_hash = hash_gen(file)
     return current_hash == original_hash
 
-    
-
-
-
-    
+def vault_delete(file: str):
+    db = get_db()
+    nf = db['OTN'][file]
+    del db['OTN'][file]
+    del db['NTO'][nf]
+    del db['F_H'][file]
+    os.remove(nf)

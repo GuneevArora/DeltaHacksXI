@@ -14,3 +14,7 @@ _pw_shower = components.declare_component('pw_shower', url='http://localhost:300
 def pw_shower(entries):
     return _pw_shower(entries=entries)
 
+_vault = components.declare_component('vault', url='http://localhost:3001/vault')
+def vault(files):
+    return _vault(files=files)
+

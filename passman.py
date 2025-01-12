@@ -23,7 +23,7 @@ _MSGS = []
 MODEL = 'command-r-08-2024'
 
 _DB = None
-F = './poasjdfhasidgbsab'
+F = '.vault/poasjdfhasidgbsab'
 
 def load_db():
     global _DB
