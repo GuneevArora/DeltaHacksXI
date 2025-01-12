@@ -87,7 +87,6 @@ if prompt := st.chat_input("What is up?"):
         )
     
         response = res.message.content[0].text
-        print('COHERE response:', response)
         st.markdown(response)
     st.session_state.messages.append({ 'role': 'assistant', 'content': response })
 
@@ -113,7 +112,10 @@ TABS = [
 
 with icon_col:
     for icon,tab in TABS:
-        if icon_btn(src=icon, key=tab):
+        ibv = icon_btn(src=icon, key=tab)
+
+        print(tab, 'BTN state', ibv)
+        if ibv == 1:
             toggle_sidebar(tab)
 
 st.markdown(SIDE_BAR_STYLING, unsafe_allow_html=True)
