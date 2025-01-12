@@ -7,6 +7,7 @@ from react_components import icon_btn, pwn_card
 from passman import generate_pass, PWSetup
 from url_checker import check_url_safety
 from time import sleep
+from enc import encrypt, decrypt, verify_file_integrity, generate_key, upload_to_vault
 
 if 'messages' not in st.session_state:
     st.session_state.messages = []
@@ -193,6 +194,23 @@ elif st.session_state['sidebar_state'] == 'safe':
                 st.markdown('\n'.join(f'- {platform}' for platform in res['platforms']))
             else:
                 st.text('This website is NOT currently flagged for being malicious.')
+
+#the encryption vault
+elif st.session_state['sidebar_state'] == 'vault':
+    with tab_col:
+        st.header('Encrypt Files in Vault:')
+        file = st.file_uploader("Drop Files Here:")
+        if file != "" : enc_submit = st.button("Submit")
+        if enc_submit:
+            key = generate_key()
+            upload_to_vault(file)
+            st.text("File stored successfully! Here is your key: ", key)
+                
+
+
+        
+        
+            
 
 
 st.markdown(SIDE_BAR_STYLING, unsafe_allow_html=True)

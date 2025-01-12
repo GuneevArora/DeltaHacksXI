@@ -47,7 +47,7 @@ def get_db():
         _DB = {'OTN':{},'NTO':{},'F_H':{}}
     #encrypt the database
     key = get_key()
-    encrypted_db = encrypt('.vault/j9xyrhffSaKepY7B8', key)
+    (encrypted_db, key) = encrypt('.vault/j9xyrhffSaKepY7B8')
     with open('.vault/', 'wb') as f:
         f.write(encrypted_db)
 
@@ -63,11 +63,10 @@ def generate_key():
 
 def encrypt(data: str):
     key = get_key()
-    return key.encrypt(data)
+    return (key.encrypt(data), key)
 
-def upload_to_vault(file: str):
-    with open(file, 'rb') as f:
-        encrypted = encrypt(f.read())
+def upload_to_vault(file):
+    (encrypted, key) = encrypt(file.read())
     nf = random_generator()
     with open(nf, 'wb') as f:
         f.write(encrypted)
@@ -77,7 +76,7 @@ def upload_to_vault(file: str):
     db['OTN'][file] = nf
     db['NTO'][nf] = file
     db['F_H'][file] = fh
-    return True
+    return key
 
 #Decrypt the file
 def decrypt(file, key):
@@ -97,8 +96,7 @@ def decrypt(file, key):
 
 #File Integrity Checker to 
 def hash_gen(file):
-    with open(file, 'rb') as f:
-        data = f.read()
+    data = file.read()
     
     file_hash = hashlib.sha256(data).hexdigest()    
 
