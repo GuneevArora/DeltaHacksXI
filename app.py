@@ -19,9 +19,6 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-<<<<<<< Updated upstream
-if prompt := st.chat_input("What is up?"):
-=======
 
 def ask_bot(messages, rerun = False):
     res = client.chat(
@@ -175,7 +172,6 @@ if st.session_state['explain_leak'] is not None:
     st.session_state['skip'] = False
 
 if prompt := st.chat_input("Ask a question:"):
->>>>>>> Stashed changes
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
