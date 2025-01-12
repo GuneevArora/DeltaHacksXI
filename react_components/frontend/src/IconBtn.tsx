@@ -28,7 +28,7 @@ function IconBtn({ args }: ComponentProps): ReactElement {
     }, [clicked]);
 
     return (
-        <div className="w-full flex justify-center items-center transition transform hover:scale-110 p-4" style={{height: `${HEIGHT}px`}}>
+        <div className="w-full flex justify-center items-center transition transform scale-[95%] hover:scale-[98%]" style={{height: `${HEIGHT}px`}}>
             <button className="flex justify-center items-center w-40 aspect-square border border-2 rounded-lg"  onClick={() => { Streamlit.setComponentValue(1); setClicked(true); }}>
                 <img style={{maxWidth: "50%", maxHeight: "50%"}} src={src}>
                 </img>
