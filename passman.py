@@ -2,11 +2,13 @@ import streamlit as st
 import cohere
 import string
 import random
+import os
+import json
 from dataclasses import dataclass
+import ard
+import enc
 
 _CLIENT = None
-
-
 
 @dataclass
 class PWSetup:
@@ -19,6 +21,30 @@ class PWSetup:
 
 _MSGS = []
 MODEL = 'command-r-08-2024'
+
+_DB = None
+F = './poasjdfhasidgbsab'
+
+def load_db():
+    global _DB
+    if os.path.exists(F):
+        with open(F, 'rb') as f:
+            ee = enc.decrypt(f.read())
+        _DB = json.loads(ee.decode())
+    else:
+        _DB = []
+        save_db()
+
+def get_pwdb():
+    if _DB is None:
+        load_db()
+    return _DB
+
+def save_db():
+    global _DB
+    ee = json.dumps(_DB).encode()
+    with open(F, 'wb') as f:
+        f.write(enc.encrypt(ee))
 
 class TooManyRequests(Exception):
     def __init__(self):
@@ -62,4 +88,23 @@ def generate_pass(pws: PWSetup):
     random.shuffle(sn)
     ac += ''.join(sn)
     return ac
+
+def add_password(site: str, un: str, pw: str):
+    db = get_pwdb()
+    db.append({ 'site': site, 'username': un, 'password': pw })
+    save_db()
+
+def get_list():
+    return [ { 'site': entry['site'], 'username': entry['username'] } for entry in get_pwdb() ]
+
+def view_password(idx: int) -> str:
+    db = get_pwdb()
+    if len(db) <= idx:
+        return "Password doesn't exist"
+    ent = db[idx]
+    try:
+        ard.send_ard(ent['password'])
+        return 'Password sent to viewing system.'
+    except ConnectionRefusedError:
+        return 'Viewing system disengaged'
 

@@ -3,8 +3,8 @@ import streamlit as st
 from streamlit.delta_generator import DeltaGenerator
 from leaked_sites import is_valid_email, check_email_leaks
 import cohere
-from react_components import icon_btn, pwn_card
-from passman import generate_pass, PWSetup
+from react_components import icon_btn, pw_shower, pwn_card
+from passman import generate_pass, PWSetup, get_list as get_password_list, view_password, add_password
 from url_checker import check_url_safety
 from time import sleep
 
@@ -16,6 +16,12 @@ if 'skip' not in st.session_state:
     st.session_state['skip'] = False
 if 'explain_leak' not in st.session_state:
     st.session_state['explain_leak'] = None
+if 'VIEW_PASS' not in st.session_state:
+    st.session_state['VIEW_PASS'] = -1
+
+@st.dialog('Info')
+def modal(mes: str):
+    st.write(mes)
 
 st.markdown('''
 <style>
@@ -84,7 +90,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 
-def ask_bot(messages, rerun = False):
+def ask_bot(messages):
     res = client.chat(
         model='command-r-plus-08-2024',
         messages=messages
@@ -103,7 +109,7 @@ def explain_leak(leak_source):
     ask_bot([
         { 'role': 'system', 'content': 'You are a bot that reports on data breaches and explain why and what happend. Only respond with answers in line with the topic, do not stray away from data breaches. Do not make up answers.'},
         { 'role': 'user', 'content': new_msg }
-    ], rerun=True)
+    ])
 
 
 if st.session_state['explain_leak'] is not None:
@@ -164,6 +170,10 @@ if st.session_state['sidebar_state'] == "leak":
             else:
                 st.error("Email Not Valid!")
 elif st.session_state['sidebar_state'] == 'pwman':
+    if st.session_state['VIEW_PASS'] != -1:
+        modal(view_password(st.session_state['VIEW_PASS']))
+        st.session_state['VIEW_PASS'] = -1
+
     with tab_col:
         with st.expander('Password Generator'):
             mil = st.number_input(label='Minimum chars', value=6)
@@ -175,6 +185,19 @@ elif st.session_state['sidebar_state'] == 'pwman':
             if st.button(label='Generate Password'):
                 pg = generate_pass(PWSetup(mil, mal, sn, nn, cn))
                 st.text(pg)
+
+        st.header('Saved Passwords')
+
+        site = st.text_input('site')
+        username = st.text_input('username/email', value='')
+        password = st.text_input('password', value='')
+        if st.button('Save password'):
+            add_password(site, username, password)
+
+        pw_c = pw_shower(get_password_list())
+        if pw_c is not None and pw_c != -1:
+            st.session_state['VIEW_PASS'] = pw_c
+            st.rerun()
 elif st.session_state['sidebar_state'] == 'safe':
     with tab_col:
         st.header('Is that a safe URL?')
